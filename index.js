@@ -1,15 +1,24 @@
 import fetch from 'node-fetch';
 import cheerio from 'cheerio';
+import child from 'child_process';
 
-const spellProperties = ['Cible','Composantes', 'Temps d\'incantation','Portée', 'Durée', 'Jet de sauvegarde']
+const spellProperties = ['Cible',
+                         'Composantes', 
+                         'Temps d\'incantation',
+                         'Portée', 
+                         'Durée', 
+                         'Jet de sauvegarde']
 
-async function getListOfSpells(){
-  const page = await fetch('http://localhost:8080/sorts.htm')
-  return page.text()
+function delay(ms){
+  return new Promise((res) => setTimeout(res,ms))
+}
+
+function storeAssets(spell){
+  const ls = child.exec('wget http://www.gemmaline.com/sorts/' + spell['lien'] + ' -P assets') 
 }
 
 async function getSpellDetail(spellDetail){
-  const url = 'http://www.gemmaline.com/sorts/' + spellDetail['link']
+  const url = 'http://localhost:8080/' + spellDetail['lien']
   const page = await fetch(url)
   const text = await page.text() 
   const html = cheerio.load(text)
@@ -21,31 +30,47 @@ async function getSpellDetail(spellDetail){
       }
   })
 
-  //spellDetail['description'] = html('p').text()
-
   return spellDetail
 }
 
-getListOfSpells().then(text => {
-  const html  = cheerio.load(text) 
-  const spellDetails = [] 
 
-  html("ul").each((i,spells) => {
-    const spellLevel = i
-    html(spells).find('a').each((i,spell) => {
+async function getListOfSpells(){
+  const url = 'http://localhost:8080/liste-classe-base-druide.htm'
+  const page = await fetch(url)
+  const text = await page.text()
+  const html  = cheerio.load(text) 
+  const spellList = [] 
+
+  html("ul").each((currentLevel,spells) => {
+    const spellLevel = currentLevel 
+    html(spells).find('a').each((index,spell) => {
       const spellDetail = {}
-      spellDetail['level'] = spellLevel
-      spellDetail['name'] = html(spell).text() 
-      spellDetail['link'] = html(spell).attr('href')
-      spellDetails.push(getSpellDetail(spellDetail))
+      spellDetail['niveau'] = spellLevel
+      spellDetail['nom'] = html(spell).text() 
+      spellDetail['lien'] = html(spell).attr('href')
+      spellList.push(spellDetail)
     })
   })
-  
-  Promise.all(spellDetails).then((values) => {
-    console.log(values);
+
+  return spellList
+}
+
+
+function processListofSpells(){
+  const detailedSpellsList = []
+  getListOfSpells().then((spell) => {
+   console.log(spell)
+   detailedSpellsList.push(getSpellDetail(spell))
   })
+  return detailedSpellsList;
+}
 
-})
+async function downloadAssets(){
+  const listOfSpell = await getListOfSpells()
+  for (const spell of listOfSpell){
+    await delay(3000)
+    storeAssets(spell)
+  }
+}
 
-
-
+console.log(processListofSpells())
