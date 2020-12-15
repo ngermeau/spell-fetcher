@@ -55,13 +55,13 @@ async function getListOfSpells(){
   return spellList
 }
 
-
-function processListofSpells(){
+async function processListofSpells(){
   const detailedSpellsList = []
-  getListOfSpells().then((spell) => {
-   console.log(spell)
-   detailedSpellsList.push(getSpellDetail(spell))
-  })
+  const listOfSpells = await getListOfSpells()
+  listOfSpells.forEach((spell) => {
+    detailedSpellsList.push(getSpellDetail(spell))
+  });
+  console.log(detailedSpellsList.length)
   return detailedSpellsList;
 }
 
@@ -73,4 +73,9 @@ async function downloadAssets(){
   }
 }
 
-console.log(processListofSpells())
+processListofSpells().then((detailedSpellList) => {
+  console.log(detailedSpellList)
+})
+//Promise.all(processListofSpells()).then((detailedSpellList) => {
+ // console.log(detailedSpellList)
+//})
