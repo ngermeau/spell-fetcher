@@ -18,6 +18,7 @@ function storeAssets(spell){
 }
 
 async function getSpellDetail(spellDetail){
+  console.log('retrieving detail for spell: ' + spellDetail['lien'])
   const url = 'http://localhost:8080/' + spellDetail['lien']
   const page = await fetch(url)
   const text = await page.text() 
@@ -29,12 +30,12 @@ async function getSpellDetail(spellDetail){
         spellDetail[strongElementValue] = html(detail)[0].next.data
       }
   })
-
   return spellDetail
 }
 
 
 async function getListOfSpells(){
+  console.log('retrieving list of spells')
   const url = 'http://localhost:8080/liste-classe-base-druide.htm'
   const page = await fetch(url)
   const text = await page.text()
@@ -55,7 +56,7 @@ async function getListOfSpells(){
   return spellList
 }
 
-async function processListofSpells(){
+async function process(){
   const detailedSpellsList = []
   const listOfSpells = await getListOfSpells()
   listOfSpells.forEach((spell) => {
@@ -73,7 +74,7 @@ async function downloadAssets(){
   }
 }
 
-processListofSpells().then((detailedSpellList) => {
+process().then((detailedSpellList) => {
   console.log(detailedSpellList)
 })
 //Promise.all(processListofSpells()).then((detailedSpellList) => {
