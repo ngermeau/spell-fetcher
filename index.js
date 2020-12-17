@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import cheerio from 'cheerio';
 import child from 'child_process';
+import csvw from 'csv-writer';
 
 const spellProperties = ['Cible',
                          'Composantes', 
@@ -18,7 +19,7 @@ async function getSpellDetail(spellDetail){
   const page = await fetch(url)
   const text = await page.text() 
   const html = cheerio.load(text)
-
+  
     html("strong").each((i,detail) => {
       const strongElementValue= html(detail).text()
       if (spellProperties.includes(strongElementValue)) {
@@ -34,7 +35,7 @@ async function getListOfSpells(){
   const text = await page.text()
   const html  = cheerio.load(text) 
   const spellList = [] 
-
+  
   html("ul").each((currentLevel,spells) => {
     const spellLevel = currentLevel 
     html(spells).find('a').each((index,spell) => {
@@ -54,8 +55,7 @@ async function process(){
   const detailedSpellsList = listOfSpells.map((spell) => {
     return getSpellDetail(spell)
   });
-  const spells = await Promise.all(detailedSpellsList)
-  return spells;
+  return await Promise.all(detailedSpellsList)
 }
 
 async function downloadAssets(){
@@ -66,8 +66,21 @@ async function downloadAssets(){
   }
 }
 
+const createCsvWriter = csvw.createObjectCsvWriter
+const csvWriter = createCsvWriter({
+    path: 'file.csv',
+    header: spellProperties
+});
+
+const records = [
+    {Cible: 'Bob',  Composantes: '0'}
+];
+
+
 process().then((spells) => {
-  console.log(spells)
-  //console.log(detailedSpellList)
+csvWriter.writeRecords(spells)       // returns a promise
+    .then(() => {
+        console.log('...Done');
+    });
 })
 
