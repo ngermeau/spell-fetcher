@@ -4,20 +4,22 @@ import cheerio from 'cheerio';
 import child from 'child_process';
 import csvw from 'csv-writer';
 
+const remoteServ = 'http://localhost:8080/'
 const filename = 'spells.csv'
 
-const spellProperties = [ { id: 'nom', title: 'nom' }, 
+const spellProperties = [ { id: 'niveau', title: 'niveau' },
+                          { id: 'nom', title: 'nom' }, 
                           { id: 'lien', title: 'lien' },
-                          { id: 'niveau', title: 'niveau' },
                           { id: 'Cible', title: 'Cible' },
-                          { id : 'Composantes', title: 'Composantes' },
                           { id : 'Temps d\'incantation', title: 'Temps d\'incantation'},
                           { id : 'Portée', title: 'Portée'},
+                          { id : 'Zone d\'effet', title: 'Zone d\'effet'},
                           { id : 'Durée', title: 'Durée'},
                           { id : 'Jet de sauvegarde', title: 'Jet de sauvegarde'}
                         ]
 
 
+// To download the assets avoiding getting ban from usage 
 async function downloadAssets(){
   const listOfSpell = await getListOfSpells()
   for (const spell of listOfSpell){
@@ -35,7 +37,7 @@ function cleanup(stringData){
 }
 
 async function getSpellDetail(spell){
-  const url = 'http://localhost:8080/' + spell['lien'] 
+  const url = remoteServ + spell['lien'] 
   const page = await fetch(url)
   const text = await page.text() 
   const html = cheerio.load(text)
@@ -46,7 +48,7 @@ async function getSpellDetail(spell){
 }
 
 async function getListOfSpells(){
-  const url = 'http://localhost:8080/liste-classe-base-druide.htm'
+  const url = remoteServ + 'liste-classe-base-druide.htm'
   const page = await fetch(url)
   const text = await page.text()
   const html  = cheerio.load(text) 
@@ -81,6 +83,6 @@ process().then((spells) => {
  csvWriter.writeRecords(spells)       
    .then(() => {
         console.log('...Done');
-    });
+    })
 })
 
