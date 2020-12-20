@@ -1,62 +1,22 @@
+'use strict'
 import fetch from 'node-fetch';
 import cheerio from 'cheerio';
 import child from 'child_process';
 import csvw from 'csv-writer';
 
-const spellProperties = ['Cible',
-                         'Composantes', 
-                         'Temps d\'incantation',
-                         'Portée', 
-                         'Durée', 
-                         'Jet de sauvegarde']
+const filename = 'spells.csv'
 
-function delay(ms){
-  return new Promise((res) => setTimeout(res,ms))
-}
+const spellProperties = [ { id: 'nom', title: 'nom' }, 
+                          { id: 'lien', title: 'lien' },
+                          { id: 'niveau', title: 'niveau' },
+                          { id: 'Cible', title: 'Cible' },
+                          { id : 'Composantes', title: 'Composantes' },
+                          { id : 'Temps d\'incantation', title: 'Temps d\'incantation'},
+                          { id : 'Portée', title: 'Portée'},
+                          { id : 'Durée', title: 'Durée'},
+                          { id : 'Jet de sauvegarde', title: 'Jet de sauvegarde'}
+                        ]
 
-async function getSpellDetail(spellDetail){
-  const url = 'http://localhost:8080/' + spellDetail['lien']
-  const page = await fetch(url)
-  const text = await page.text() 
-  const html = cheerio.load(text)
-  
-    html("strong").each((i,detail) => {
-      const strongElementValue= html(detail).text()
-      if (spellProperties.includes(strongElementValue)) {
-        spellDetail[strongElementValue] = html(detail)[0].next.data
-      }
-  })
-  return spellDetail
-}
-
-async function getListOfSpells(){
-  const url = 'http://localhost:8080/liste-classe-base-druide.htm'
-  const page = await fetch(url)
-  const text = await page.text()
-  const html  = cheerio.load(text) 
-  const spellList = [] 
-  
-  html("ul").each((currentLevel,spells) => {
-    const spellLevel = currentLevel 
-    html(spells).find('a').each((index,spell) => {
-      const spellDetail = {}
-      spellDetail['niveau'] = spellLevel
-      spellDetail['nom'] = html(spell).text() 
-      spellDetail['lien'] = html(spell).attr('href')
-      spellList.push(spellDetail)
-    })
-  })
-
-  return spellList
-}
-
-async function process(){
-  const listOfSpells = await getListOfSpells()
-  const detailedSpellsList = listOfSpells.map((spell) => {
-    return getSpellDetail(spell)
-  });
-  return await Promise.all(detailedSpellsList)
-}
 
 async function downloadAssets(){
   const listOfSpell = await getListOfSpells()
@@ -66,20 +26,60 @@ async function downloadAssets(){
   }
 }
 
+function delay(ms){
+  return new Promise((res) => setTimeout(res,ms))
+}
+
+function cleanup(stringData){
+  return stringData.replace(':','').trim() 
+}
+
+async function getSpellDetail(spell){
+  const url = 'http://localhost:8080/' + spell['lien'] 
+  const page = await fetch(url)
+  const text = await page.text() 
+  const html = cheerio.load(text)
+  const ids = spellProperties.map((el) => { return el.id })
+  html("strong").filter((i,el) => ids.includes(html(el).text()))
+                       .map((i,el) =>  spell[html(el).text()] = cleanup(html(el)[0].next.data))
+  return spell
+}
+
+async function getListOfSpells(){
+  const url = 'http://localhost:8080/liste-classe-base-druide.htm'
+  const page = await fetch(url)
+  const text = await page.text()
+  const html  = cheerio.load(text) 
+ 
+  const listOfSpells = html("ul").map((currentLevel,spells) => {
+                        return html(spells).find('a').map((index,spell) => {
+                         return {
+                            ['niveau']: currentLevel,
+                            ['nom']: html(spell).text(),
+                            ['lien']: html(spell).attr('href')
+                          }
+                        }).get()
+                      }).get()
+  return listOfSpells
+
+}
+
+async function process(){
+  const listOfSpells = await getListOfSpells()
+  const listOfDetailedSpells =  listOfSpells.map(spell => getSpellDetail(spell));
+  return await Promise.all(listOfDetailedSpells)
+}
+
+
 const createCsvWriter = csvw.createObjectCsvWriter
 const csvWriter = createCsvWriter({
-    path: 'file.csv',
+    path: filename,
     header: spellProperties
 });
 
-const records = [
-    {Cible: 'Bob',  Composantes: '0'}
-];
-
-
 process().then((spells) => {
-csvWriter.writeRecords(spells)       // returns a promise
-    .then(() => {
+ csvWriter.writeRecords(spells)       
+   .then(() => {
         console.log('...Done');
     });
 })
