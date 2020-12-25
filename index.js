@@ -4,8 +4,8 @@ import cheerio from 'cheerio';
 import child from 'child_process';
 import csvw from 'csv-writer';
 
-const spellProperties = [ { id: 'niveau', title: 'niveau' },
-                          { id: 'nom', title: 'nom' }, 
+const spellProperties = [ { id: 'nom', title: 'nom' }, 
+                          { id: 'niveau', title: 'niveau' },
                           { id: 'lien', title: 'lien' },
                           { id: 'Cible', title: 'Cible' },
                           { id : 'Temps d\'incantation', title: 'Temps d\'incantation'},
