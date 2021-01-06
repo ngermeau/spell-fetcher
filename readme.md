@@ -1,7 +1,10 @@
 # Intro
 
 Basic spells fetcher for gemmaline website.
-
+```
+node index.js
+```
+ 
 # Todo
 - [x] rethink async and review promises
 - [x] fix encoding issues 
