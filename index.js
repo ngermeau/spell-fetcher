@@ -15,10 +15,11 @@ const spellProperties = [ { id: 'nom', title: 'nom' },
                           { id : 'Jet de sauvegarde', title: 'Jet de sauvegarde'}
                         ]
 
+//const remoteServ = 'http://gemmaline.com/sorts/'
 const remoteServ = 'http://localhost:8080/'
-const download = false
-const spellsListUrl = "liste-classe-ensorceleur.htm"
-const filename = "ensorceleur.csv" 
+const download = false 
+const spellsListUrl = "liste-classe-pretre.htm"
+const filename = "pretre.csv" 
 const createCsvWriter = csvw.createObjectCsvWriter
 const csvWriter = createCsvWriter({
     path: filename,
@@ -52,7 +53,7 @@ function delay(ms){
  * @param   {string}  stringData  the string needed to be cleanup
  * @return  {string}              cleaned up string
  */
-function cleanup(stringData){
+export function cleanup(stringData){
   return stringData.replace(':','').trim() 
 }
 

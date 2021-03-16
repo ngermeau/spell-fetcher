@@ -4,13 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "keywords": [],
   "author": "",
   "type": "module",
   "license": "ISC",
   "dependencies": {
+    "jest": "^26.6.3",
     "cheerio": "^1.0.0-rc.3",
     "csv-writer": "^1.6.0",
     "fetch-charset-detection": "^0.5.0",

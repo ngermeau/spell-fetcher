@@ -1,0 +1,8 @@
+{
+    "name": "my-project",
+      "jest": {
+            "verbose": true,
+            "testEnvironment": "jest-environment-node",
+             "transform": {}
+          }
+}
