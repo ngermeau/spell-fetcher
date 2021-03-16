@@ -1,8 +1,8 @@
 # Intro
 
-Basic spells fetcher for gemmaline website.
+Basic spells fetcher for gemmaline website. Output a csv containing all the spells.
 ```
-node index.js
+node index.js http://www.gemmaline.com/sorts/liste-classe-mage.htm
 ```
  
 # Todo
@@ -12,6 +12,4 @@ node index.js
 - [x] use map instead of each and use objects and optimize code at max
 - [x] encode to csv
 - [x] use strict 
-- [ ] pass parameters for download assets or process
-- [ ] retrieve description as well 
-- [ ] retrieve more properties of the spells
+- [x] pass parameters for download assets or process
