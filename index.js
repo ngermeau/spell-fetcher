@@ -53,7 +53,7 @@ async function getSpells(spellsUrl){
 async function getSpellsDetail(spells){
   let detailedSpells = []
   for (const spell of spells){
-    await delay(3000)
+    await delay(3000) //avoid getting banned bro
     detailedSpells.push(getSpellDetail(spell))
   }
   return Promise.all(detailedSpells)
@@ -63,7 +63,7 @@ async function getSpellsDetail(spells){
  * Getting the detail of one spell
  */
 async function getSpellDetail(spell){
-  console.log(spell)
+  console.log("retrieving spell detail for " + spell['lien'])
   const html = await retrieveHtml(spell['lien'])
   const ids = spellProperties.map((el) => { return el.id })
   html("strong").filter((i,el) => ids.includes(html(el).text()))
@@ -89,7 +89,6 @@ export function cleanup(stringData){
 let spellsUrl = process.argv.slice(2)[0]
 
 getSpells(spellsUrl).then((spells) => {
-  //console.log(spells)
   getSpellsDetail(spells).then( spellsDetail => {
    csvWriter.writeRecords(spellsDetail)       
     .then(() => {
